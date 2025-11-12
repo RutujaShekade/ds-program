@@ -1,0 +1,45 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int attended (int arr[], int size, int roll ){
+	int i;
+	 for (i=0; i<size; i++){
+		if(arr[i] == roll){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int main(){
+	int n;
+	printf("Enter the roll no of students who attended the training:");
+	scanf("%d",& n);
+
+
+    int*rolls= (int*) malloc (n* sizeof (int));
+    if (rolls == NULL){
+	printf("Memory allocation failed!\n");
+	return 1;
+    }
+    printf("Enter the roll no (in random order):\n");
+    int i;
+    for (i=0; i<n; i++){
+    scanf("%d",& rolls[i]);
+    }
+
+    int query;
+    printf("Enter the roll no for search:");
+    scanf("%d", & query);
+
+
+    if (attended(rolls, n, query)){
+	printf("Enter the roll no %d attended the training.\n ", query);
+    }	
+	else{
+	printf("Enter the roll no %d did not attended the training.\n",query);
+    }
+
+    free(rolls);
+    return 0;
+}
