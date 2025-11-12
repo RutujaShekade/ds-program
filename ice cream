@@ -1,0 +1,120 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
+
+void append(Node** head, int data) {
+    Node* n = (Node*)malloc(sizeof(Node));
+    n->data = data;
+    n->next = NULL;
+    if (*head == NULL) *head = n;
+    else {
+        Node* t = *head;
+        while (t->next) t = t->next;
+        t->next = n;
+    }
+}
+
+int contains(Node* head, int data) {
+    while (head) {
+        if (head->data == data) return 1;
+        head = head->next;
+    }
+    return 0;
+}
+
+void display(Node* head) {
+    while (head) {
+        printf("%d ", head->data);
+        head = head->next;
+    }
+    printf("\n");
+}
+
+int count(Node* head) {
+    int c = 0;
+    while (head) { c++; head = head->next; }
+    return c;
+}
+
+void freeList(Node** head) {
+    Node* temp;
+    while (*head) {
+        temp = *head;
+        *head = (*head)->next;
+        free(temp);
+    }
+}
+
+Node* getUnion(Node* a, Node* b) {
+    Node* r = NULL;
+    while (a) { append(&r, a->data); a = a->next; }
+    while (b) {
+        if (!contains(r, b->data)) append(&r, b->data);
+        b = b->next;
+    }
+    return r;
+}
+
+Node* getIntersection(Node* a, Node* b) {
+    Node* r = NULL;
+    while (a) {
+        if (contains(b, a->data)) append(&r, a->data);
+        a = a->next;
+    }
+    return r;
+}
+
+Node* getSymmetricDifference(Node* a, Node* b) {
+    Node* r = NULL;
+    Node* t = a;
+    while (t) {
+        if (!contains(b, t->data)) append(&r, t->data);
+        t = t->next;
+    }
+    t = b;
+    while (t) {
+        if (!contains(a, t->data)) append(&r, t->data);
+        t = t->next;
+    }
+    return r;
+}
+
+int main() {
+    int total = 20;
+    Node *A = NULL, *B = NULL;
+
+    int vanilla[] = {1, 3, 5, 7, 9, 11, 15, 18};
+    int butter[]  = {3, 6, 9, 12, 15, 18, 20};
+    int nv = sizeof(vanilla) / sizeof(vanilla[0]);
+    int nb = sizeof(butter) / sizeof(butter[0]);
+    
+     int i;
+    for (i = 0; i < nv; i++) append(&A, vanilla[i]);
+    for (i = 0; i < nb; i++) append(&B, butter[i]);
+
+    printf("Ice Cream Survey Results\n");
+    printf("\nTotal students: %d\n", total);
+    printf("Vanilla lovers (A): "); display(A);
+    printf("Butterscotch lovers (B): "); display(B);
+
+    Node* both = getIntersection(A, B);
+    printf("\n(a) Both (A n B): "); display(both);
+
+    Node* either = getSymmetricDifference(A, B);
+    printf("\n(b) Either but not both (A ? B): "); display(either);
+
+    Node* uni = getUnion(A, B);
+    int neither = total - count(uni);
+    printf("\n(c) Neither: %d students\n", neither);
+
+    freeList(&A);
+    freeList(&B);
+    freeList(&both);
+    freeList(&either);
+    freeList(&uni);
+    return 0;
+}
