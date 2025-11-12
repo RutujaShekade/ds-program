@@ -1,0 +1,171 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define ROWS 10
+#define SEATS 7
+
+typedef struct Seat {
+    int seat_no;
+    struct Seat* next;
+    struct Seat* prev;
+} Seat;
+
+Seat* row_heads[ROWS]; 
+
+
+Seat* create_seat(int seat_no) {
+    Seat* new_seat = (Seat*)malloc(sizeof(Seat));
+    if (!new_seat) {
+        printf("Memory allocation failed!\n");
+        exit(1);
+    }
+    new_seat->seat_no = seat_no;
+    new_seat->next = NULL;
+    new_seat->prev = NULL;
+    return new_seat;
+}
+
+void initialize_theater() {
+	int i;
+    for (i = 0; i < ROWS; i++) {
+        row_heads[i] = NULL;
+        int j;
+        for (j = SEATS; j >= 1; j--) {
+            Seat* new_seat = create_seat(j);
+            new_seat->next = row_heads[i];
+            if (row_heads[i] != NULL)
+                row_heads[i]->prev = new_seat;
+            row_heads[i] = new_seat;
+        }
+    }
+}
+
+
+void display_seats() {
+    printf("\n Available Seats \n");
+    int i;
+    for (i = 0; i < ROWS; i++) {
+        printf("Row %2d: ", i + 1);
+        Seat* temp = row_heads[i];
+        if (!temp) {
+            printf("(No seats available)");
+        }
+        while (temp != NULL) {
+            printf("%d ", temp->seat_no);
+            temp = temp->next;
+        }
+        printf("\n");
+    }
+}
+
+
+void book_seat(int row, int seat_no) {
+    if (row < 1 || row > ROWS || seat_no < 1 || seat_no > SEATS) {
+        printf("Invalid input.\n");
+        return;
+    }
+
+    Seat* temp = row_heads[row - 1];
+    while (temp != NULL && temp->seat_no != seat_no)
+        temp = temp->next;
+
+    if (temp == NULL) {
+        printf("Seat %d in row %d is already booked.\n", seat_no, row);
+        return;
+    }
+
+    
+    if (temp->prev != NULL)
+        temp->prev->next = temp->next;
+    else
+        row_heads[row - 1] = temp->next; 
+
+    if (temp->next != NULL)
+        temp->next->prev = temp->prev;
+
+    free(temp);
+    printf("Seat %d in row %d booked successfully.\n", seat_no, row);
+}
+
+void cancel_seat(int row, int seat_no) {
+    if (row < 1 || row > ROWS || seat_no < 1 || seat_no > SEATS) {
+        printf("Invalid input.\n");
+        return;
+    }
+
+    Seat* temp = row_heads[row - 1];
+    while (temp != NULL) {
+        if (temp->seat_no == seat_no) {
+            printf("Seat %d in row %d is not booked yet.\n", seat_no, row);
+            return;
+        }
+        temp = temp->next;
+    }
+
+    
+    Seat* new_seat = create_seat(seat_no);
+    Seat* head = row_heads[row - 1];
+    if (head == NULL || seat_no < head->seat_no) {
+        new_seat->next = head;
+        if (head != NULL)
+            head->prev = new_seat;
+        row_heads[row - 1] = new_seat;
+    } else {
+        temp = head;
+        while (temp->next != NULL && temp->next->seat_no < seat_no)
+            temp = temp->next;
+        new_seat->next = temp->next;
+        if (temp->next != NULL)
+            temp->next->prev = new_seat;
+        new_seat->prev = temp;
+        temp->next = new_seat;
+    }
+
+    printf("Seat %d in row %d cancellation successful.\n", seat_no, row);
+}
+
+
+void random_bookings() {
+    book_seat(1, 2);
+    book_seat(3, 4);
+    book_seat(5, 1);
+    book_seat(7, 5);
+}
+
+int main() {
+    int choice, row, seat_no;
+    initialize_theater();
+    random_bookings();
+
+    while (1) {
+        printf("\n Cinemax Theater Booking \n");
+        printf("1. Display available seats\n");
+        printf("2. Book a seat\n");
+        printf("3. Cancel a booking\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                display_seats();
+                break;
+            case 2:
+                printf("Enter row (1-10) and seat number (1-7) to book: ");
+                scanf("%d%d", &row, &seat_no);
+                book_seat(row, seat_no);
+                break;
+            case 3:
+                printf("Enter row (1-10) and seat number (1-7) to cancel: ");
+                scanf("%d%d", &row, &seat_no);
+                cancel_seat(row, seat_no);
+                break;
+            case 4:
+                printf("Exiting system. Thank you!\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Try again.\n");
+        }
+    }
+    return 0;
+}
