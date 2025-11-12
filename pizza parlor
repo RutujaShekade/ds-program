@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_ORDERS 5 
+
+struct Queue {
+    int orders[MAX_ORDERS]; 
+    int front, rear;       
+};
+
+void initQueue(struct Queue* q) {
+    q->front = q->rear = -1; 
+}
+
+int isFull(struct Queue* q) {
+    return (q->rear + 1) % MAX_ORDERS == q->front;
+}
+
+int isEmpty(struct Queue* q) {
+    return q->front == -1;
+}
+
+void addJob(struct Queue* q, int jobId) {
+    if (isFull(q)) {
+        printf("Queue is full. Cannot accept more orders.\n");
+        return;
+    }
+    if (isEmpty(q)) {
+        q->front = 0;
+    }
+    q->rear = (q->rear + 1) % MAX_ORDERS; 
+    q->orders[q->rear] = jobId; 
+    printf("Job %d added to the queue.\n", jobId);
+}
+
+void deleteJob(struct Queue* q) {
+    if (isEmpty(q)) {
+        printf("Queue is empty. No orders to serve.\n");
+        return;
+    }
+    printf("Job %d deleted from the queue.\n", q->orders[q->front]);
+    if (q->front == q->rear) {
+        q->front = q->rear = -1; 
+    } else {
+        q->front = (q->front + 1) % MAX_ORDERS; 
+    }
+}
+
+void displayQueue(struct Queue* q) {
+    if (isEmpty(q)) {
+        printf("Queue is empty.\n");
+        return;
+    }
+    printf("Jobs in the queue: ");
+    int i = q->front;
+    while (i != q->rear) {
+        printf("%d ", q->orders[i]);
+        i = (i + 1) % MAX_ORDERS;
+    }
+    printf("%d\n", q->orders[q->rear]);
+}
+
+int main() {
+    struct Queue q;
+    int choice, jobId;
+    initQueue(&q);
+
+    while (1) {
+        printf("\nPizza Parlor Job Queue Simulation:\n");
+        printf("1. Add job\n");
+        printf("2. Delete job\n");
+        printf("3. Display queue\n");
+        printf("4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1:
+                printf("Enter job ID to add: ");
+                scanf("%d", &jobId);
+                addJob(&q, jobId);
+                break;
+            case 2:
+                deleteJob(&q);
+                break;
+            case 3:
+                displayQueue(&q);
+                break;
+            case 4:
+                printf("Exiting program...\n");
+                exit(0);
+            default:
+                printf("Invalid choice, please try again.\n");
+        }
+    }
+    return 0;
+}
