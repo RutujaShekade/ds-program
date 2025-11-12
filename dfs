@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 100
+
+int graph[MAX][MAX];
+bool visited[MAX];
+int numCities;
+
+void DFS(int v) {
+    visited[v] = true;
+    for (int i = 0; i < numCities; i++) {
+        if (graph[v][i] != 0 && !visited[i]) {
+            DFS(i);
+        }
+    }
+}
+
+int main() {
+    int numFlights;
+    char cities[MAX][50];
+
+    printf("Enter number of cities: ");
+    scanf("%d", &numCities);
+
+    printf("Enter city names:\n");
+    for (int i = 0; i < numCities; i++) {
+        scanf("%s", cities[i]);
+    }
+
+    for (int i = 0; i < numCities; i++)
+        for (int j = 0; j < numCities; j++)
+            graph[i][j] = 0;
+
+    printf("Enter number of flights (edges): ");
+    scanf("%d", &numFlights);
+
+    printf("Enter flights in format: SourceIndex DestinationIndex Cost\n");
+    for (int i = 0; i < numFlights; i++) {
+        int src, dest, cost;
+        scanf("%d %d %d", &src, &dest, &cost);
+        graph[src][dest] = cost;
+        graph[dest][src] = cost; 
+        
+    }
+
+    printf("\nAdjacency Matrix:\n");
+    for (int i = 0; i < numCities; i++) {
+        for (int j = 0; j < numCities; j++) {
+            printf("%3d ", graph[i][j]);
+        }
+        printf("\n");
+    }
+
+    for (int i = 0; i < numCities; i++) {
+        visited[i] = false;
+    }
+
+    DFS(0);
+
+    bool isConnected = true;
+    for (int i = 0; i < numCities; i++) {
+        if (!visited[i]) {
+            isConnected = false;
+            break;
+        }
+    }
+
+    if (isConnected) {
+        printf("\nThe graph is CONNECTED (All cities are reachable).\n");
+    } else {
+        printf("\nThe graph is NOT CONNECTED (Some cities are unreachable).\n");
+    }
+
+    return 0;
+}
